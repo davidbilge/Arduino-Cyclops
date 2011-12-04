@@ -30,8 +30,10 @@ void draw() {
     fill(204);                    // change color and
     if (!high) {
       myPort.write('H');              // send an H to indicate mouse is over square
-      print('H');
-      high = true;
+      if (readAnswer() == 'H') {
+        print('H');
+        high = true;
+      }
     }
   } 
   else {                        // If mouse is not over square,
@@ -39,8 +41,10 @@ void draw() {
     
     if (high) {
       myPort.write('L');              // send an L otherwise
-      high = false;
-      print('L');
+      if (readAnswer() == 'L') {
+        high = false;
+        print('L');
+      }
     }
   }
   rect(50, 50, 100, 100);         // Draw a square
@@ -48,4 +52,12 @@ void draw() {
 
 boolean mouseOverRect() { // Test if mouse is over square
   return ((mouseX >= 50) && (mouseX <= 150) && (mouseY >= 50) && (mouseY <= 150));
+}
+
+char readAnswer() {
+  while (myPort.available() == 0) {
+    delay(100);
+  }
+  
+  return myPort.readChar();
 }
