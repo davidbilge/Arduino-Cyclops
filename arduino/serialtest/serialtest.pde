@@ -15,15 +15,19 @@
    if (Serial.available()) 
    { // If data is available to read,
      val = Serial.read(); // read it and store it in val
+   } else {
+     val = 'N';
    }
  
    if (val == 'H')
    { // If H was received
      digitalWrite(ledPin, HIGH); // turn the LED on
+     Serial.write('H');
    } 
-   else 
+   else if (val == 'L')
    {
      digitalWrite(ledPin, LOW); // Otherwise turn it OFF
+     Serial.write('L');
    }
    delay(100); // Wait 100 milliseconds for next reading
  }
