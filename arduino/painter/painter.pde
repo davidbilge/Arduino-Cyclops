@@ -9,9 +9,20 @@ const int pin_m1_dir = 3;
 const int pin_m2_step = 4;
 const int pin_m2_dir = 5;
 
+const int pin_led_r = 9;
+const int pin_led_g = 10;
+const int pin_led_b = 11;
+
 // TODO: Set correct values!
 const int max_x = 200;
 const int max_y = 200;
+
+const int max_r = 255;
+const int max_g = 200;
+const int max_b = 110;
+
+const int len_arm_1 = 180;
+const int len_arm_2 = 180;
 
 String cmdBuf = "";
 const char cmdStart = '[';
@@ -25,11 +36,17 @@ int mc_m2 = 0;
 
 void setup() {
   Serial.begin(9600);
+  
   pinMode(pin_dbg_led, OUTPUT); 
+  
   pinMode(pin_m1_step, OUTPUT); 
   pinMode(pin_m1_dir, OUTPUT); 
   pinMode(pin_m2_step, OUTPUT); 
   pinMode(pin_m2_dir, OUTPUT);
+  
+  pinMode(pin_led_r, OUTPUT);
+  pinMode(pin_led_g, OUTPUT);
+  pinMode(pin_led_b, OUTPUT);  
 }
 
 void loop() {
@@ -118,10 +135,6 @@ void moveToCoord(int x, int y) {
  }
  
  Serial.println(c + "Moving to coords " + x + ", " + y + " ... ");
-}
-
-void setColor(int r, int g, int b) {
-
 }
 
 int getInt(String text)
@@ -226,3 +239,23 @@ void resetMC() {
   mc_m2 = 0;
 }
 
+void setColor(int r, int g, int b) {
+  analogWrite(pin_led_r, map(r, 0,255, 0,max_r));
+  analogWrite(pin_led_g, map(g, 0,255, 0,max_g));
+  analogWrite(pin_led_b, map(b, 0,255, 0,max_b));  
+}
+
+// ALPHA
+float getAngleM1(int x, int y) {
+  float d = sqrt(x*x+y*y);
+  
+  return acos(-((len_arm_2*len_arm_2 - len_arm_1*len_arm_1 - d*d) / (2*len_arm_1*d)));
+}
+
+
+// BETA
+float getAngleM2(int x, int y) {
+  float d = sqrt(x*x+y*y);
+  
+  return acos(-((d*d - len_arm_2*len_arm_2 - len_arm_1*len_arm_1) / (2*len_arm_1*len_arm_2)));
+}
