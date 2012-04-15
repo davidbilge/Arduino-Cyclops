@@ -4,6 +4,11 @@ const int error_out_of_range = 0;
 
 const int pin_dbg_led = 13;
 
+const int pin_m1_step = 2;
+const int pin_m1_dir = 3;
+const int pin_m2_step = 4;
+const int pin_m2_dir = 5;
+
 // TODO: Set correct values!
 const int max_x = 200;
 const int max_y = 200;
@@ -15,9 +20,16 @@ const char paramListStart = '(';
 const char paramListEnd = ')';
 const char paramSeparator = ',';
 
+int mc_m1 = 0;
+int mc_m2 = 0;
+
 void setup() {
   Serial.begin(9600);
-  pinMode(pin_dbg_led, OUTPUT);  
+  pinMode(pin_dbg_led, OUTPUT); 
+  pinMode(pin_m1_step, OUTPUT); 
+  pinMode(pin_m1_dir, OUTPUT); 
+  pinMode(pin_m2_step, OUTPUT); 
+  pinMode(pin_m2_dir, OUTPUT);
 }
 
 void loop() {
@@ -59,6 +71,12 @@ void executeCommand(String raw_cmd) {
     String g_raw = getParameter(paramList, 1);
     String b_raw = getParameter(paramList, 2);
     setColor(getInt(r_raw), getInt(g_raw), getInt(b_raw));
+  } else if (verb.equals("step")) {
+    String nMotor1_raw = getParameter(paramList, 0);
+    String nMotor2_raw = getParameter(paramList, 1);
+    doStep(getInt(nMotor1_raw), getInt(nMotor2_raw));
+  } else if (verb.equals("resetMC")) {
+    resetMC();
   } else {
     Serial.println("Unknown verb '" + verb + "'.");
   }
@@ -113,4 +131,92 @@ int getInt(String text)
   }
   return x;
 } 
+
+void stepToMC(int motorCoord1, int motorCoord2) {
+  
+}
+
+void doStep(int nSteps1, int nSteps2) {
+  String c = "";
+  
+  if(nSteps1 < 0){
+    digitalWrite(pin_m1_dir, LOW);
+  }
+  else{
+    digitalWrite(pin_m1_dir, HIGH);
+  }
+  
+  if(nSteps2 < 0){
+    digitalWrite(pin_m2_dir, LOW);
+  }
+  else{
+    digitalWrite(pin_m2_dir, HIGH);
+  }  
+  
+  nSteps1 = abs(nSteps1);
+  nSteps2 = abs(nSteps2);  
+  
+  Serial.println(c + "Doing " + nSteps1 + " steps on pins " + pin_m1_dir + " (dir) and " + pin_m1_step + " (step)  ...");
+  Serial.println(c + "Doing " + nSteps2 + " steps on pins " + pin_m2_dir + " (dir) and " + pin_m2_step + " (step)  ...");  
+  
+  
+  for (int i=0; i<max(nSteps1,nSteps2); ++i) {
+    if (i<nSteps1) {
+      digitalWrite(pin_m1_step, HIGH);
+    }
+    if (i<nSteps2) {
+      digitalWrite(pin_m2_step, HIGH);
+    }
+    delayMicroseconds(50);
+    digitalWrite(pin_m1_step, LOW);
+    digitalWrite(pin_m2_step, LOW);
+    delay(100);
+    //Serial.println(c + "Step " + i);
+  }
+}
+
+// void doStep(int dir, int nMotor, int nSteps)
+// {
+//  String c = "";
+//  
+//  int pinDir = -1;
+//  int pinStep = -1;
+//  
+//  if(nMotor == 1){
+//    pinDir = pin_m1_dir;
+//    pinStep = pin_m1_step;
+//  }
+//  else if(nMotor == 2){
+//    pinDir = pin_m2_dir;
+//    pinStep = pin_m2_step;
+//  }
+//  else{
+//    return;
+//  }
+//  
+//  if(dir == 0){
+//    digitalWrite(pinDir, HIGH);
+//  }
+//  else{
+//    digitalWrite(pinDir, LOW);
+//  }
+//  
+//  Serial.println(c + "Doing " + nSteps + " steps on pins " + pinDir + " (dir) and " + pinStep + " (step)  ...");
+//  
+//  for (int i=0; i<nSteps; ++i) {
+//    digitalWrite(pinStep, HIGH);
+//    delayMicroseconds(50);
+//    digitalWrite(pinStep, LOW);
+//    delay(100);
+//    //Serial.println(c + "Step " + i);
+//  }
+
+  
+  
+// }
+
+void resetMC() {
+  mc_m1 = 0;
+  mc_m2 = 0;
+}
 
