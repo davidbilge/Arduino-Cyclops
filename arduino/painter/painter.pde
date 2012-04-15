@@ -77,6 +77,10 @@ void executeCommand(String raw_cmd) {
     doStep(getInt(nMotor1_raw), getInt(nMotor2_raw));
   } else if (verb.equals("resetMC")) {
     resetMC();
+  } else if (verb.equals("stepToMC")) {
+    String nMotor1_raw = getParameter(paramList, 0);
+    String nMotor2_raw = getParameter(paramList, 1);
+    stepToMC(getInt(nMotor1_raw), getInt(nMotor2_raw));
   } else {
     Serial.println("Unknown verb '" + verb + "'.");
   }
@@ -133,7 +137,9 @@ int getInt(String text)
 } 
 
 void stepToMC(int motorCoord1, int motorCoord2) {
-  
+  doStep(motorCoord1 - mc_m1, motorCoord2 - mc_m2);
+  mc_m1 = motorCoord1;
+  mc_m2 = motorCoord2;
 }
 
 void doStep(int nSteps1, int nSteps2) {
