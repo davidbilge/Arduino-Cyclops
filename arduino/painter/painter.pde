@@ -259,3 +259,7 @@ float getAngleM2(int x, int y) {
   
   return acos(-((d*d - len_arm_2*len_arm_2 - len_arm_1*len_arm_1) / (2*len_arm_1*len_arm_2)));
 }
+
+int angleToMC(float angle) {
+
+}
