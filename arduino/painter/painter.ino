@@ -254,7 +254,7 @@ void setColor(int r, int g, int b) {
 }
 
 // ALPHA
-float getAngleM1(int x, int y) {
+float getAngleAlpha(int x, int y) {
   float d = sqrt(x*x+y*y);
 
   return acos(-((len_arm_2*len_arm_2 - len_arm_1*len_arm_1 - d*d) / (2*len_arm_1*d)));
@@ -262,13 +262,17 @@ float getAngleM1(int x, int y) {
 
 
 // BETA
-float getAngleM2(int x, int y) {
+float getAngleBeta(int x, int y) {
   float d = sqrt(x*x+y*y);
 
   return acos(-((d*d - len_arm_2*len_arm_2 - len_arm_1*len_arm_1) / (2*len_arm_1*len_arm_2)));
 }
 
-int angleToMC(float angle) {
+float getAngleM1(int x, int y) {
+  return (M_PI/2) - getAngleAlpha(x,y) - atan(y/x);
+}
 
+float getAngleM2(int x, int y) {
+  return getAngleAlpha(x,y) + getAngleBeta(x,y) - getAngleM1(x,y);
 }
 
