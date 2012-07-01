@@ -64,8 +64,6 @@ void loop() {
         cmdBuf = "";
       }
     }
-
-
   }
 }
 
@@ -73,6 +71,8 @@ void executeCommand(String raw_cmd) {
   String cmd = raw_cmd.substring(1, raw_cmd.length() - 1);
   int paramListStartPos = cmd.indexOf(paramListStart);
   int paramListEndPos = cmd.indexOf(paramListEnd);
+
+  boolean success = true;
 
   String verb = cmd.substring(0,paramListStartPos);
   verb.trim();
@@ -108,6 +108,11 @@ void executeCommand(String raw_cmd) {
   } 
   else {
     Serial.println("Unknown verb '" + verb + "'.");
+    success = false;
+  }
+  
+  if (success) {
+    Serial.println("S");
   }
 }
 
@@ -142,7 +147,7 @@ void moveToCoord(int x, int y) {
     Serial.println(c + "Coords out of range. Max range is 0.." + max_x + " and 0.." + max_y + " for x and y, respectively.");
   }
 
-  Serial.println(c + "Moving to coords " + x + ", " + y + " ... ");
+  // Serial.println(c + "Moving to coords " + x + ", " + y + " ... ");
 }
 
 int getInt(String text)
