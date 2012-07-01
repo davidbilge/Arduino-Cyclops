@@ -13,6 +13,8 @@ const int pin_led_r = 9;
 const int pin_led_g = 10;
 const int pin_led_b = 11;
 
+const int steps_per_revolution = 1600; // The native spr of the motor is 200. 1600 is because of 1/8 stepping mode in EasyDriver
+
 // TODO: Set correct values!
 const int max_x = 200;
 const int max_y = 200;
@@ -47,6 +49,8 @@ void setup() {
   pinMode(pin_led_r, OUTPUT);
   pinMode(pin_led_g, OUTPUT);
   pinMode(pin_led_b, OUTPUT);  
+  
+  resetMC();
 }
 
 void loop() {
@@ -147,6 +151,11 @@ void moveToCoord(int x, int y) {
     Serial.println(c + "Coords out of range. Max range is 0.." + max_x + " and 0.." + max_y + " for x and y, respectively.");
   }
 
+  int mc1 = angleToMC(getAngleM1(x,y));
+  int mc2 = angleToMC(getAngleM2(x,y));
+
+  stepToMC(mc1, mc2);
+  
   // Serial.println(c + "Moving to coords " + x + ", " + y + " ... ");
 }
 
@@ -192,6 +201,7 @@ void doStep(int nSteps1, int nSteps2) {
   Serial.println(c + "Doing " + nSteps2 + " steps on pins " + pin_m2_dir + " (dir) and " + pin_m2_step + " (step)  ...");  
 
 
+ /*
   for (int i=0; i<max(nSteps1,nSteps2); ++i) {
     if (i<nSteps1) {
       digitalWrite(pin_m1_step, HIGH);
@@ -205,6 +215,7 @@ void doStep(int nSteps1, int nSteps2) {
     delay(10);
     //Serial.println(c + "Step " + i);
   }
+  */
 }
 
 // void doStep(int dir, int nMotor, int nSteps)
@@ -269,15 +280,25 @@ float getAngleAlpha(int x, int y) {
 // BETA
 float getAngleBeta(int x, int y) {
   float d = sqrt(x*x+y*y);
-
-  return acos(-((d*d - len_arm_2*len_arm_2 - len_arm_1*len_arm_1) / (2*len_arm_1*len_arm_2)));
+  
+  return acos((len_arm_2 * len_arm_2 + d * d - len_arm_1 * len_arm_1) / (2 * len_arm_2 * d));
 }
 
+// Correct (see JUnit tests)
 float getAngleM1(int x, int y) {
   return (M_PI/2) - getAngleAlpha(x,y) - atan(y/x);
 }
 
+// Correct (see JUnit tests)
 float getAngleM2(int x, int y) {
   return getAngleAlpha(x,y) + getAngleBeta(x,y) - getAngleM1(x,y);
 }
 
+int angleToMC(float angle) {
+  // angle %= M_PI*2;
+  return (angle / M_PI*2) * (float)steps_per_revolution;
+}
+
+// TODOs:
+// - Handle negative angles
+// - Check initial values for M2 (would expect 90° as initial position) - in our math, 0° seems to be 12 o'clock for both motors
