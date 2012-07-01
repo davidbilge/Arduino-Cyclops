@@ -15,21 +15,28 @@ import org.slf4j.LoggerFactory;
 
 import de.davidbilge.cyclopse_controller.serial.SerialPortFactory;
 
-public class LedWriter {
-	private static final Logger LOGGER = LoggerFactory.getLogger(LedWriter.class);
+public class ArduinoCommandInterface {
+	private static final Logger LOGGER = LoggerFactory.getLogger(ArduinoCommandInterface.class);
 
-	boolean closed = false;
+	private final boolean closed = false;
 	private final PrintWriter out;
-	BufferedReader in;
-	InputStream is;
-	SerialPort serialPort;
+	private final BufferedReader in;
+	private final InputStream is;
+	private final SerialPort serialPort;
 
-	public LedWriter(String portName) throws IOException {
+	public ArduinoCommandInterface(String portName) throws IOException {
 		serialPort = SerialPortFactory.openPort(portName);
 		OutputStream os = serialPort.getOutputStream();
 		out = new PrintWriter(new OutputStreamWriter(os));
 		is = serialPort.getInputStream();
 		in = new BufferedReader(new InputStreamReader(is));
+
+		try {
+			Thread.sleep(2000); // Wait for arduino to establish connection ...
+								// apparently
+		} catch (InterruptedException e) {
+			LOGGER.error("Unable to sleep", e);
+		}
 	}
 
 	public void close() {
