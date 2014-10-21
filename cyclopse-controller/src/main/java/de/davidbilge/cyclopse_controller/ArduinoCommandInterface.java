@@ -42,6 +42,8 @@ public class ArduinoCommandInterface implements AutoCloseable {
 	}
 
 	public void executeCommand(String command) throws IOException {
+		LOGGER.info("-> " + command);
+
 		try {
 			serialPort.writeString(command);
 
@@ -58,6 +60,8 @@ public class ArduinoCommandInterface implements AutoCloseable {
 
 		if (answer.equalsIgnoreCase("S")) {
 			LOGGER.info("Received 'success' answer.");
+		} else {
+			throw new SerialCommunicationException("No success received, answer was " + answer);
 		}
 	}
 

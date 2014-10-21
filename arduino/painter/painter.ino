@@ -197,8 +197,8 @@ void doStep(int nSteps1, int nSteps2) {
   nSteps1 = abs(nSteps1);
   nSteps2 = abs(nSteps2);  
 
-  Serial.println(c + "Doing " + nSteps1 + " steps on pins " + pin_m1_dir + " (dir) and " + pin_m1_step + " (step)  ...");
-  Serial.println(c + "Doing " + nSteps2 + " steps on pins " + pin_m2_dir + " (dir) and " + pin_m2_step + " (step)  ...");  
+  // Serial.println(c + "Doing " + nSteps1 + " steps on pins " + pin_m1_dir + " (dir) and " + pin_m1_step + " (step)  ...");
+  // Serial.println(c + "Doing " + nSteps2 + " steps on pins " + pin_m2_dir + " (dir) and " + pin_m2_step + " (step)  ...");  
 
 
  /*
