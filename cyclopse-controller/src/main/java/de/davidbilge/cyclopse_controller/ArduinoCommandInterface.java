@@ -1,35 +1,26 @@
 package de.davidbilge.cyclopse_controller;
 
-import gnu.io.SerialPort;
-
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
+
+import jssc.SerialPort;
+import jssc.SerialPortException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.davidbilge.cyclopse_controller.serial.SerialCommunicationException;
 import de.davidbilge.cyclopse_controller.serial.SerialPortFactory;
 
-public class ArduinoCommandInterface {
+public class ArduinoCommandInterface implements AutoCloseable {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ArduinoCommandInterface.class);
 
+	private static final String LINESEP = System.lineSeparator();
+
 	private final boolean closed = false;
-	private final PrintWriter out;
-	private final BufferedReader in;
-	private final InputStream is;
 	private final SerialPort serialPort;
 
 	public ArduinoCommandInterface(String portName) throws IOException {
 		serialPort = SerialPortFactory.openPort(portName);
-		OutputStream os = serialPort.getOutputStream();
-		out = new PrintWriter(new OutputStreamWriter(os));
-		is = serialPort.getInputStream();
-		in = new BufferedReader(new InputStreamReader(is));
 
 		try {
 			Thread.sleep(2000); // Wait for arduino to establish connection ...
@@ -39,34 +30,59 @@ public class ArduinoCommandInterface {
 		}
 	}
 
+	@Override
 	public void close() {
 		if (!closed) {
-			out.close();
 			try {
-				in.close();
-			} catch (IOException e) {
-				LOGGER.warn("Unable to close input stream", e);
+				serialPort.closePort();
+			} catch (SerialPortException e) {
+				throw new SerialCommunicationException("Unable to close serial port", e);
 			}
-			serialPort.close();
 		}
 	}
 
 	public void executeCommand(String command) throws IOException {
-		out.println(command);
-		out.flush();
+		try {
+			serialPort.writeString(command);
 
-		while (is.available() < 1) {
-			try {
-				Thread.sleep(50);
-			} catch (InterruptedException e) {
-				LOGGER.error("Unable to wait", e);
-			}
+		} catch (SerialPortException e) {
+			throw new IOException(e);
 		}
 
-		String answer = in.readLine();
+		String answer;
+		try {
+			answer = readLine();
+		} catch (SerialPortException e) {
+			throw new IOException(e);
+		}
+
 		if (answer.equalsIgnoreCase("S")) {
-			LOGGER.info("Blinked LED.");
+			LOGGER.info("Received 'success' answer.");
 		}
+	}
+
+	private String readLine() throws SerialPortException {
+		StringBuilder sb = new StringBuilder();
+
+		boolean lineFinished = false;
+
+		while (!lineFinished) {
+			while (serialPort.getInputBufferBytesCount() < 1) {
+				try {
+					Thread.sleep(50);
+				} catch (InterruptedException e) {
+					LOGGER.error("Unable to wait", e);
+				}
+
+			}
+
+			sb.append(serialPort.readString());
+
+			lineFinished = sb.substring(sb.length() - LINESEP.length()).equals(LINESEP);
+		}
+
+		String answer = sb.substring(0, sb.length() - LINESEP.length());
+		return answer;
 	}
 
 }

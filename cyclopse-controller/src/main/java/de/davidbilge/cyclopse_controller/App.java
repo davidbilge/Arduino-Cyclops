@@ -24,8 +24,6 @@ public class App {
 		LOGGER.info("Startup ...");
 		LOGGER.info("Available serial ports are " + SerialPortFactory.listSerialPortIdentifiers() + ".");
 
-		SerialPortFactory.listSerialPortIdentifiers();
-
 		ArduinoCommandInterface w = new ArduinoCommandInterface("COM3");
 		w.executeCommand("[blink_led(3)]");
 		w.close();

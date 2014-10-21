@@ -23,7 +23,7 @@ public class LedWriter {
 	 *            The y part of the coordinate in millimeters
 	 */
 	public void write(Color c, int x, int y) throws IOException {
-		ci.executeCommand("[moveToCoord(" + x + "," + y + "]");
+		ci.executeCommand("[moveToCoord(" + x + "," + y + ")]");
 		ci.executeCommand("[setColor(" + c.getRed() + "," + c.getGreen() + "," + c.getBlue() + ")]");
 	}
 }
